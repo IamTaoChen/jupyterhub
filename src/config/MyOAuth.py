@@ -1,11 +1,10 @@
-
+from __future__ import annotations
 from oauthenticator.generic import GenericOAuthenticator
 import re
 from tornado import gen
 from urllib.parse import urlparse
 import requests
 from dataclasses import dataclass, field
-from __future__ import annotations
 
 # import logging
 
