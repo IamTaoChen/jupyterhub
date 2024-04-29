@@ -122,7 +122,7 @@ class MyOAuth(GenericOAuthenticator):
             self.authorize_url = _oidc.authorize_url or self.authorize_url
             self.logout_redirect_url = _oidc.logout_redirect_url or self.logout_redirect_url
             
-            string_=str(_oidc)
+            # string_=str(_oidc)
             # log.debug("oidc: %s", string_)
             # log.debug("token_url: %s", self.token_url)
             # log.debug("userdata_url: %s", self.userdata_url)
