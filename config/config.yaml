@@ -1,0 +1,97 @@
+allowed_images:
+  scipy: jupyter/jupyter-scipy:latest
+  # GPU-CuPy: eqe/jupyter-gpu:latest
+  # code-server: eqe/code-server:4.14.1
+  code-server: 
+    image: my/code-server:latest
+    allow_colab: false
+  minimal-notebook: jupyter/minimal-notebook
+
+groups:
+  collaborative:
+    users:
+      - collab-eqe1
+      - collab-eqe2
+    # admins:
+    #   - aaa
+
+roles:
+
+  - name: server
+    scopes:
+      - inherit
+      - self
+
+  # - name: member-access-servers
+  #   scopes:
+  #     - access:servers!group=Member
+  #     - access:services!group=Member
+  #   groups:
+  #     - Member
+
+  - name: collab-access-1
+    scopes:
+      - access:servers!user=collab-eqe1
+      - admin:servers!user=collab-eqe1
+      - admin-ui
+      - list:users!user=collab-eqe1
+    groups:
+      - Member
+
+  - name: collab-access-2
+    scopes:
+      - access:servers!user=collab-eqe2
+      - admin:servers!user=collab-eqe2
+      - admin-ui
+      - list:users!user=collab-eqe2
+    groups:
+      - Member
+
+  - name: idle-culler
+    description: Culls idle servers
+    scopes:
+      - read:users:name
+      - read:users:activity
+      - servers
+    services:
+      - idle-culler
+
+services:
+  - name: idle-culler
+    admin: true
+    command:
+      - python3
+      - -m
+      - jupyterhub_idle_culler
+      - --timeout=72000
+ad:
+  enable: true
+  # allow_users:
+    # - chentao
+    # - zzhanchuan
+    # - heqian
+  config:
+    host: 10.233.10.11
+    port: 389
+    base_dn: OU=EQE,DC=ds,DC=example,DC=com
+    bind_dn: 
+    bind_pw: PASSWORD
+    user_search_rdn: OU=Users
+    group_search_rdn: OU=Groups
+    user_search_filter: (cn=*)
+    user_username_attribute: sAMAccountName
+    force_gid: 
+      enable: true
+      gid: 1615200513
+      name: eqe
+  # append_groups:
+  #     - 1615200513
+  local_cache:
+    enable: true
+    connect: '/data/ad_cache.sqlite3'
+    table: ad_cache
+
+ai:
+  enable: true
+  name: OPENAI_API_KEY
+  key: token

@@ -9,7 +9,7 @@ from tornado import gen
 # log.debug("groups: %s", groups)
 class MyOAuth(GenericOAuthenticator):
     user_auth_state_key = 'oauth_user'
-    group_path_in_userinfo = 'zoneinfo'
+    group_path_in_userinfo = 'groups'
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         if not callable(self.claim_groups_key):
@@ -57,3 +57,17 @@ class MyOAuth(GenericOAuthenticator):
             if match:
                 groups.append(match.group(1))
         return groups
+
+    def extract_endpoint(self, discovery_url)->None:
+        """
+        Extract the endpoint from the discovery URL. If the discovery URL is None, return None.
+        """
+        if discovery_url is None:
+            return None
+        # If the discovery URL is not None, extract the endpoint from the URL.
+        # Try to match the discovery URL with the regular expression.
+        REGEX = r'^(https?://[^/]+)'
+        match = re.match(REGEX, discovery_url)
+        if  not match:
+            return None
+        
