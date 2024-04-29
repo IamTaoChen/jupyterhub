@@ -1,0 +1,3 @@
+PyYAML
+dockerspawner
+ldap3

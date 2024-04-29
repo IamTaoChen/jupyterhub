@@ -1,0 +1,85 @@
+allowed_images:
+  scipy: my/jupyter-scipy:latest
+  GPU: my/jupyter-gpu:latest
+  qutip: my/jupyter-qutip:latest
+  qiskit: my/jupyter-qiskit:latest
+  arc: my/jupyter-arc:latest
+  tensorflow: my/jupyter-tensorflow:latest
+  code-server: 
+    image: my/code-server:latest
+    allow_colab: false
+  streamlit: my/streamlit:latest
+  minimal-notebook: jupyter/minimal-notebook
+
+form:
+  logo_url_default: https://cdn2.modelbit.com/_next/static/media/modelbit-logo-only.a802bbca.svg
+  python_versions_default: ['python-3.11']
+  data:
+    - name: Modelbit
+      description: Python environment for working with the Modelbit package and ecosystem. Tools include modelbit and exploratory packages like sklearn, etc.
+      logo_url: https://cdn2.modelbit.com/_next/static/media/modelbit-logo-only.a802bbca.svg
+      python_versions: ['python-3.9', 'python-3.8', 'python-3.7']
+      image: modelbit-docker-image
+
+    - name: OtherEnvironment
+      description: Another description.
+      logo_url: https://other-logo-url.com
+      python_versions: ['python-3.9', 'python-3.8']
+      image: other-docker-image
+
+
+
+groups:
+  collaborative:
+    users:
+      - collab-eqe1
+      - collab-eqe2
+    admins:
+      - wenchaoxu
+
+roles:
+  - name: member-access-servers
+    scopes:
+      - access:servers!group=Member
+    groups:
+      - Member
+
+  - name: eqe1-collab-access
+    scopes:
+      - access:servers!user=collab-eqe1
+      - admin:servers!user=collab-eqe1
+      - admin-ui
+      - list:users!user=collab-eqe1
+    groups:
+      - Member
+
+  - name: eqe2-collab-access
+    scopes:
+      - access:servers!user=collab-eqe2
+      - admin:servers!user=collab-eqe2
+      - admin-ui
+      - list:users!user=collab-eqe2
+    groups:
+      - Member
+
+ad:
+  enabled: true
+  config:
+    host: ad.example.com
+    port: 389
+    base_dn: dc=example,dc=com
+    bind_dn: cn=binduser,dc=example,dc=com
+    bind_pw: bindpassword
+    user_search_rdn: ou=users
+    user_search_filter: (objectClass=person)
+    user_username_attribute: uid
+  local_cache:
+    enabled: true
+    connect: '/data/ad_cache.sqlite3'
+    table: ad_cache
+  
+
+ai:
+  enable: false
+  name: OPENAI_API_KEY
+  key: test
