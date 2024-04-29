@@ -20,14 +20,10 @@ c.Spawner.default_url = '/lab'
 # Authenticator
 c.JupyterHub.authenticator_class = MyOAuth
 c.MyOAuth.auto_login = True
-OIDC_BASE="https://auth.example.com/realms/main/protocol/openid-connect"
+c.MyOAuth.discovery_url = "https://auth.xxxxxxx.com/.well-known/openid-configuration"
 c.MyOAuth.client_id = "code-oidc"
 c.MyOAuth.client_secret = "CHANGEIT"
-c.MyOAuth.token_url = OIDC_BASE+"/token"
-c.MyOAuth.userdata_url = OIDC_BASE+"/userinfo"
-c.MyOAuth.authorize_url = OIDC_BASE+"/auth"
 c.MyOAuth.oauth_callback_url = "https://code.example.com/hub/oauth_callback"
-c.MyOAuth.logout_redirect_url = OIDC_BASE+"/logout"
 c.MyOAuth.username_key = "preferred_username"
 c.MyOAuth.login_service = 'Example'
 
@@ -73,22 +69,15 @@ c.MyDockerSpawner.use_internal_ip = True
 
 # user data persistence
 # see https://github.com/jupyterhub/dockerspawner#data-persistence-and-dockerspawner
-notebook_dir_archive = '/home/jovyan'
 notebook_dir_public = "/public"
 notebook_dir_lab_data = "/lab"
 
-user_dir_archive = 'jupyterhub-{username}'
-# lab_data = '/run/desktop/mnt/host/c/Users/taochen/Nextcloud/Group/Data'
 lab_data = '/lab'
-# public_data = 'jupyterhub-public'
-# user_data = '/home/users/{username}'
-# user_dir = '/home/jupyterhub/{username}'
 public_data = '/public'
 local_home = '/home/users/{username}'
 jupyter_home = '/home/{username}'
 c.MyDockerSpawner.notebook_dir = jupyter_home
 c.MyDockerSpawner.volumes = {
-            user_dir_archive: {'bind': notebook_dir_archive, 'mode': 'rw'},
             public_data: {'bind': notebook_dir_public, 'mode': 'rw'},
             lab_data: {'bind': notebook_dir_lab_data, 'mode': 'ro'},
             local_home: {'bind': jupyter_home, 'mode': 'rw'}

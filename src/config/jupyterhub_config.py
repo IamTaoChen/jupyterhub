@@ -20,21 +20,23 @@ c.Spawner.default_url = '/lab'
 # c.JupyterHub.authenticator_class = GenericOAuthenticator
 c.JupyterHub.authenticator_class = MyOAuth
 c.MyOAuth.auto_login = True
+c.MyOAuth.discovery_url = "https://auth.xxxxxxx.com/.well-known/openid-configuration"
 c.MyOAuth.client_id = "xxxxxxx"
 c.MyOAuth.client_secret = "xxxxxxx"
-c.MyOAuth.token_url = "https://auth.xxxxxxx.com//accessToken"
-c.MyOAuth.userdata_url = "https://auth.xxxxxxx.com/profile"
-c.MyOAuth.authorize_url = "https://auth.xxxxxxx.com/oidc/authorize"
+# c.MyOAuth.token_url = "https://auth.xxxxxxx.com//accessToken"
+# c.MyOAuth.userdata_url = "https://auth.xxxxxxx.com/profile"
+# c.MyOAuth.authorize_url = "https://auth.xxxxxxx.com/oidc/authorize"
+# c.MyOAuth.logout_redirect_url = "https://auth.xxxxxxx.com/logout"
 c.MyOAuth.oauth_callback_url = "https://code.xxxxxxx.com/hub/oauth_callback"
-c.MyOAuth.logout_redirect_url = "https://auth.xxxxxxx.com/logout"
-c.MyOAuth.username_key = "sub"
+
+c.MyOAuth.username_key = "preferred_username"
 c.MyOAuth.login_service = 'OIDC'
 
 c.MyOAuth.allowed_groups = ['Member']
 # users with `administrator` role will be marked as admin
 c.MyOAuth.admin_groups = ['Administrators', 'AdminJupyterHub']
 c.MyOAuth.manage_groups = False
-c.MyOAuth.scope = ['openid', 'profile', 'email']
+c.MyOAuth.scope = ['openid', 'profile', 'email', 'groups']
 c.MyOAuth.blocked_users = ['guest', 'test']
 c.MyOAuth.admin_users = ['admin']
 # Create system users just-in-time.

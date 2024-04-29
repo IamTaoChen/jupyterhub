@@ -10,8 +10,8 @@ allowed_images:
 groups:
   collaborative:
     users:
-      - collab-eqe1
-      - collab-eqe2
+      - collab-1
+      - collab-2
     # admins:
     #   - aaa
 
@@ -31,19 +31,19 @@ roles:
 
   - name: collab-access-1
     scopes:
-      - access:servers!user=collab-eqe1
-      - admin:servers!user=collab-eqe1
+      - access:servers!user=collab-1
+      - admin:servers!user=collab-1
       - admin-ui
-      - list:users!user=collab-eqe1
+      - list:users!user=collab-1
     groups:
       - Member
 
   - name: collab-access-2
     scopes:
-      - access:servers!user=collab-eqe2
-      - admin:servers!user=collab-eqe2
+      - access:servers!user=collab-2
+      - admin:servers!user=collab-2
       - admin-ui
-      - list:users!user=collab-eqe2
+      - list:users!user=collab-2
     groups:
       - Member
 
@@ -73,7 +73,7 @@ ad:
   config:
     host: 10.233.10.11
     port: 389
-    base_dn: OU=EQE,DC=ds,DC=example,DC=com
+    base_dn: DC=ds,DC=example,DC=com
     bind_dn: 
     bind_pw: PASSWORD
     user_search_rdn: OU=Users
@@ -83,7 +83,7 @@ ad:
     force_gid: 
       enable: true
       gid: 1615200513
-      name: eqe
+      name: lab
   # append_groups:
   #     - 1615200513
   local_cache:
@@ -94,4 +94,4 @@ ad:
 ai:
   enable: true
   name: OPENAI_API_KEY
-  key: token
+  key: {TOKEN}
