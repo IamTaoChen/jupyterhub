@@ -1,21 +1,36 @@
 from __future__ import annotations
+import os
 from oauthenticator.generic import GenericOAuthenticator
+from traitlets import Bool, Dict, Set, Unicode, Union, default
+from jupyterhub.traitlets import Callable
 import re
 from tornado import gen
 from urllib.parse import urlparse
 import requests
 from dataclasses import dataclass, field
 
-# import logging
+import logging
 
 # log = logging.getLogger(__name__)
 # logging.basicConfig(level=logging.DEBUG)
-# log.debug("groups: %s", groups)
+# log.debug("groups: %s", "test")
 
 
 class MyOAuth(GenericOAuthenticator):
     user_auth_state_key = 'oauth_user'
     group_path_in_userinfo = 'groups'
+
+    discovery_url = Unicode(
+            # default_value="",
+            config=True,
+            help="""
+            Use this URL to get the discovery document for the OpenID Connect service.
+            """,
+        )
+    
+    @default("discovery_url")
+    def _discovery_url_default(self):
+        return os.environ.get("OAUTH2_DISCOVERY_URL", "")
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -23,10 +38,7 @@ class MyOAuth(GenericOAuthenticator):
             #     # self.claim_groups_key = self.extract_group_from_dn
             self.claim_groups_key = self.get_user_groups
         self._oidc: OIDC_Endpoint = None
-        try:
-            self.discovery_url: str = kwargs.get("discovery_url")
-        except KeyError:
-            self.discovery_url: str = None
+
 
     @gen.coroutine
     def authenticate(self, handler, data=None):
@@ -34,7 +46,6 @@ class MyOAuth(GenericOAuthenticator):
         This method is called when the user is authenticated.
         """
         # Call the parent class method first
-        self._pre_auth()
         auth_model = yield super().authenticate(handler, data)
         self.manage_groups = True
         if self.manage_groups:
@@ -86,18 +97,41 @@ class MyOAuth(GenericOAuthenticator):
                 groups.append(match.group(1))
         return groups
 
-    def _pre_auth(self) -> None:
+
+    def get_callback_url(self, handler=None)->str:
+        """Get my OAuth redirect URL
+
+        Either from config or guess based on the current request.
+        """
+        self._pre_auth()
+        return super().get_callback_url(handler)
+    
+    def _pre_auth(self,_oidc:OIDC_Endpoint=None) -> None|OIDC_Endpoint:
         """
         This method is called before the authentication process starts.
 
         """
-        if self._oidc is None:
-            self._oidc = OIDC_Endpoint.from_discovery_url(self.discovery_url)
-        if self._oidc is not None and self._oidc.valid:
-            self.token_url = self.token_url or self._oidc.token_url
-            self.userdata_url = self.userdata_url or self._oidc.userinfo_url
-            self.authorize_url = self.authorize_url or self._oidc.authorize_url
-            self.logout_redirect_url = self.logout_redirect_url or self._oidc.logout_redirect_url
+        if _oidc is None:
+            _oidc=self._oidc
+            if _oidc is None:
+                _oidc = OIDC_Endpoint.from_discovery_url(self.discovery_url)
+                self._oidc=_oidc                
+        if _oidc is not None and _oidc.valid:
+            self.token_url = _oidc.token_url or self.token_url
+            self.userdata_url = _oidc.userinfo_url or self.userdata_url
+            self.authorize_url = _oidc.authorize_url or self.authorize_url
+            self.logout_redirect_url = _oidc.logout_redirect_url or self.logout_redirect_url
+            
+            string_=str(_oidc)
+            # log.debug("oidc: %s", string_)
+            # log.debug("token_url: %s", self.token_url)
+            # log.debug("userdata_url: %s", self.userdata_url)
+            # log.debug("authorize_url: %s", self.authorize_url)
+            # log.debug("logout_redirect_url: %s", self.logout_redirect_url)
+            return _oidc
+        else:
+            return None
+        
 
 
 @dataclass
@@ -107,10 +141,13 @@ class OIDC_Endpoint:
     userinfo_url: str = field(default=None)
     authorize_url: str = field(default=None)
     logout_redirect_url: str = field(default=None)
-    valid: bool = field(default=False)
 
     def __post_init__(self):
         self.extract_endpoint()
+    
+    @property
+    def valid(self) -> bool:
+        return self._is_valid()
 
     def extract_endpoint(self, discovery_url: str = None) -> bool:
         """
@@ -132,8 +169,10 @@ class OIDC_Endpoint:
         self.userinfo_url = data.get("userinfo_endpoint")
         self.authorize_url = data.get("authorization_endpoint")
         self.logout_redirect_url = data.get("end_session_endpoint")
-        self.valid = True
         return True
+    
+    def _is_valid(self) -> bool:
+        return self.token_url is not None and self.userinfo_url is not None and self.authorize_url is not None and self.logout_redirect_url is not None
 
     @classmethod
     def from_discovery_url(cls, discovery_url: str) -> "OIDC_Endpoint" | None:
@@ -144,26 +183,25 @@ class OIDC_Endpoint:
         data = cls.get_discovery_info2(discovery_url)
         if data is None:
             return None
-        return cls(discovery_url=discovery_url,
-                   token_url=data.get("token_endpoint"),
-                   userinfo_url=data.get("userinfo_endpoint"),
-                   authorize_url=data.get("authorization_endpoint"),
-                   logout_redirect_url=data.get("end_session_endpoint"),
-                   valid=True
-                   )
+        return cls(discovery_url=discovery_url)
+
 
     @classmethod
-    def get_discovery_info(cls, discovery_url: str) -> dict:
+    def get_discovery_info(cls, discovery_url: str) -> dict|None:
         """
         Get the discovery information from the discovery URL.
 
         """
+        if discovery_url is None or not isinstance(discovery_url, str) or len(discovery_url) == 0:
+            return None
         response = requests.get(discovery_url)
         # check if the request is successful
         if response.status_code == 200:
             # analyze the JSON response
             data = response.json()
-            return data
+            if "issuer" in data and isinstance(data['issuer'], str):
+                return data
+            return None
         else:
             print("Failed to retrieve data: Status code", response.status_code)
             return None
@@ -180,6 +218,7 @@ class OIDC_Endpoint:
             pass
         else:
             discovery_url_list.append(f"{parsed_url.scheme}://{parsed_url.netloc}{suffix}")
+            discovery_url_list.append(f"{parsed_url.scheme}://{parsed_url.netloc}{parsed_url.path}{suffix}")
         for url in discovery_url_list:
             data = cls.get_discovery_info(url)
             if data is not None:
@@ -188,20 +227,11 @@ class OIDC_Endpoint:
 
 
 if __name__ == "__main__":
-    discovery_url = "https://auth.eqe-lab.com/realms/eqe/.well-known/openid-configuration"
-    suffix = "/.well-known/openid-configuration"
-    parsed_url = urlparse(discovery_url)
-    discovery_url_list = [discovery_url]
-    if parsed_url.path.endswith(suffix):
-        pass
-    else:
-        discovery_url_list.append(f"{parsed_url.scheme}://{parsed_url.netloc}{suffix}")
-    for url in discovery_url_list:
-        print(url)
-        data = OIDC_Endpoint.get_discovery_info(url)
-        if data is not None:
-            break
-    print(data)
+    discovery_url = "https://auth.eqe-lab.com/realms/eqe"
+    MyOAuth.discovery_url = discovery_url
+    auth = MyOAuth()
+    auth._pre_auth()
+
     # response = requests.get(url)
     # if response.status_code == 200:
     #     break
