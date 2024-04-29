@@ -2,7 +2,7 @@ allowed_images:
   scipy: jupyter/jupyter-scipy:latest
   # GPU-CuPy: eqe/jupyter-gpu:latest
   # code-server: eqe/code-server:4.14.1
-  code-server: 
+  code-server:
     image: my/code-server:latest
     allow_colab: false
   minimal-notebook: jupyter/minimal-notebook
@@ -16,7 +16,6 @@ groups:
     #   - aaa
 
 roles:
-
   - name: server
     scopes:
       - inherit
@@ -67,20 +66,20 @@ services:
 ad:
   enable: true
   # allow_users:
-    # - chentao
-    # - zzhanchuan
-    # - heqian
+  # - chentao
+  # - zzhanchuan
+  # - heqian
   config:
     host: 10.233.10.11
     port: 389
     base_dn: DC=ds,DC=example,DC=com
-    bind_dn: 
+    bind_dn:
     bind_pw: PASSWORD
     user_search_rdn: OU=Users
     group_search_rdn: OU=Groups
     user_search_filter: (cn=*)
     user_username_attribute: sAMAccountName
-    force_gid: 
+    force_gid:
       enable: true
       gid: 1615200513
       name: lab
@@ -88,10 +87,21 @@ ad:
   #     - 1615200513
   local_cache:
     enable: true
-    connect: '/data/ad_cache.sqlite3'
+    connect: "/data/ad_cache.sqlite3"
     table: ad_cache
+
+user_update:
+  # If enabled is false, the uid and gid and username will be fetched from the container
+  enable: true
+  # If from_ad is true, the uid and gid will be fetched from AD
+  # If from_ad is false, the uid and gid will be fetched 1000:1000
+  from_ad: false
+  # If from_ad is false, the uid and gid will use the following values
+  defualt_gid: 1000
+  defualt_uid: 1000
+  default_group: users
 
 ai:
   enable: true
   name: OPENAI_API_KEY
-  key: {TOKEN}
+  key: { TOKEN }
