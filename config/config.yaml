@@ -97,7 +97,7 @@ user_update:
   # If from_ad is false, the uid and gid will be fetched 1000:1000
   from_ad: false
   # If from_ad is false, the uid and gid will use the following values
-  defualt_gid: 1000
+  defualt_gid: 100
   defualt_uid: 1000
   default_group: users
 

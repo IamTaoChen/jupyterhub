@@ -38,7 +38,7 @@ class UserUpdate:
     # If from_ad is true, the uid and gid will be fetched from AD
     # If from_ad is false, the uid and gid will be fetched 1000:1000
     from_ad: bool = False
-    defualt_gid: int = 1000
+    defualt_gid: int = 100
     defualt_uid: int = 1000
     default_group: str = 'users'
 
