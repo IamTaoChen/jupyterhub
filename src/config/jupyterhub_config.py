@@ -29,7 +29,7 @@ c.MyOAuth.client_secret = "xxxxxxx"
 # c.MyOAuth.logout_redirect_url = "https://auth.xxxxxxx.com/logout"
 c.MyOAuth.oauth_callback_url = "https://code.xxxxxxx.com/hub/oauth_callback"
 
-c.MyOAuth.username_key = "preferred_username"
+c.MyOAuth.username_claim = "preferred_username"
 c.MyOAuth.login_service = 'OIDC'
 
 c.MyOAuth.allowed_groups = ['Member']

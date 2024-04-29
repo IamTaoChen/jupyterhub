@@ -24,7 +24,7 @@ c.MyOAuth.discovery_url = "https://auth.xxxxxxx.com/.well-known/openid-configura
 c.MyOAuth.client_id = "code-oidc"
 c.MyOAuth.client_secret = "CHANGEIT"
 c.MyOAuth.oauth_callback_url = "https://code.example.com/hub/oauth_callback"
-c.MyOAuth.username_key = "preferred_username"
+c.MyOAuth.username_claim = "preferred_username"
 c.MyOAuth.login_service = 'Example'
 
 GROUP = ['members/students/phd', 'members/students/msc', 'members/staff/postdoc', 'members/staff/', 'admins']
