@@ -266,10 +266,9 @@ def get_userinfo(spawner, ad_user: AdUser = None, user_source: UserUpdate = None
             spawner.log.error(e)
             return None
     else:
-        userinfo = UserInfo()
+        userinfo = UserInfo(username=username)
         userinfo.uid = user_source.defualt_uid
         userinfo.gid = user_source.defualt_gid
-        userinfo.username = username
         userinfo.groupname = user_source.default_group
     return False, userinfo
 
