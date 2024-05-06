@@ -78,8 +78,12 @@ class MyOAuth(GenericOAuthenticator):
         """
         group_path_in_userinfo = cls.group_path_in_userinfo or 'groups'
         groups = user_info.get(group_path_in_userinfo, [])
-        groups = [group[1:] if group.startswith('/') else group for group in groups]
-        return set(groups)
+        group_flat:list[str]=[]
+        for group in groups:
+            group_list=group.split('/')
+            group_list=[i for i in group_list if i.strip()!=""]
+            group_flat += group_list
+        return set(group_flat)
 
     @classmethod
     def extract_group_from_dn(self, user_info: dict[str, str]):
