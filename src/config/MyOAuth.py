@@ -61,9 +61,12 @@ class MyOAuth(GenericOAuthenticator):
     def get_allowed_groups(self, groups: list[str]) -> list[str]:
         """
         Check if the user is in the allowed groups.
+        If allowed_group is empty, then allow all groups.
         """
-        allowed_groups = set(self.allowed_groups)
         groups = set(groups)
+        allowed_groups = set(self.allowed_groups)
+        if len(allowed_groups) ==0:
+            return groups
         groups_filter = allowed_groups.intersection(groups)
         return list(groups_filter)
 
