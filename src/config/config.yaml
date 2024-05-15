@@ -73,6 +73,7 @@ ad:
     user_search_rdn: ou=users
     user_search_filter: (objectClass=person)
     user_username_attribute: uid
+    start_uid: 1615200000
   local_cache:
     enabled: true
     connect: '/data/ad_cache.sqlite3'

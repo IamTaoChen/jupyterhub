@@ -79,6 +79,7 @@ ad:
     group_search_rdn: OU=Groups
     user_search_filter: (cn=*)
     user_username_attribute: sAMAccountName
+    start_uid: 1615200000
     force_gid:
       enable: true
       gid: 1615200513

@@ -2,6 +2,7 @@ from dataclasses import dataclass, fields
 from ldap3 import Server, Connection, ALL, SUBTREE
 import sqlite3
 
+
 @dataclass
 class UserInfo:
     username: str
@@ -100,6 +101,8 @@ class LdapConfig:
 class MyAD:
     def __init__(self, ad: LdapConfig, base_uid: int = 1615200000) -> None:
         self.__ad_config = ad
+        if base_uid is None or isinstance(base_uid, int) is False or base_uid < 0:
+            base_uid = 1615200000
         self.base_uid: int = base_uid
         self.__ad: Connection = None
         self.force_gid: int = None
@@ -171,7 +174,7 @@ class MyAD:
         else:
             gid = self.force_gid
             groupname = self.force_gname
-        return UserInfo(username=username,groupname=groupname, cn=cn, uid=uid,gid=gid, sid=sid, dn=entry.entry_dn, mail=mail)
+        return UserInfo(username=username, groupname=groupname, cn=cn, uid=uid, gid=gid, sid=sid, dn=entry.entry_dn, mail=mail)
 
     def get_user_info_all(self) -> list[UserInfo]:
         """
@@ -180,13 +183,14 @@ class MyAD:
         self.connect()
         username_attr = self.ad_config.USERNAME_ATTRIBUTE
         self.ad.search(self.ad_config.USER_BASE_DN, self.ad_config.USER_FILTER, SUBTREE, attributes=['objectSid', 'cn', 'mail', username_attr])
-        user_list:list[UserInfo] = [UserInfo(username=entry[username_attr].value, cn=entry.cn.value, uid=self.sid_to_uid(entry.objectSid.value, self.base_uid), sid=entry.objectSid.value, dn=entry.entry_dn, mail=entry.mail.value if entry.mail is not None else None) for entry in self.ad.entries]
+        user_list: list[UserInfo] = [UserInfo(username=entry[username_attr].value, cn=entry.cn.value, uid=self.sid_to_uid(entry.objectSid.value, self.base_uid),
+                                              sid=entry.objectSid.value, dn=entry.entry_dn, mail=entry.mail.value if entry.mail is not None else None) for entry in self.ad.entries]
         if self.force_gid is not None:
             for user in user_list:
-                user.gid = self.force_gid 
+                user.gid = self.force_gid
                 user.groupname = self.force_gname
         return user_list
-    
+
     @classmethod
     def sid_to_uid(cls, sid: str, base_uid: int = 1615200000):
         """
@@ -266,7 +270,7 @@ class UserSql:
                 insert_query += ", "
         insert_query += ") VALUES ("
         for field in fields(UserInfo):
-            insert_query += f"'{getattr(userinfo,field.name)}'"
+            insert_query += f"'{getattr(userinfo, field.name)}'"
             if field is not fields(UserInfo)[-1]:
                 insert_query += ", "
         insert_query += ");"
@@ -313,7 +317,7 @@ class UserSql:
 
 
 class AdUser:
-    def __init__(self, ldap_config: LdapConfig = None, sql: UserSql = None):
+    def __init__(self, ldap_config: LdapConfig = None, sql: UserSql = None, start_uid: int = 1615200000) -> None:
         if ldap_config is None:
             ldap_config = LdapConfig()
         if sql is None:
@@ -324,9 +328,10 @@ class AdUser:
         self.force_gname: str = None
         self.append_groups: list[str] = None
         self.allow_users: list[str] = None
+        self.start_uid: int = start_uid
 
     def user_sync(self):
-        ad = MyAD(self.ldap_config)
+        ad = MyAD(self.ldap_config, base_uid=self.start_uid)
         ad.connect()
         users = ad.get_user_info_all()
         ad.disconnect()

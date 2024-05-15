@@ -201,10 +201,14 @@ class MyConfig:
         else:
             connect = ad['local_cache']['connect']
             table = ad['local_cache']['table']
+        if "start_uid" in ad_config:
+            start_uid = ad_config["start_uid"]
+        else:
+            start_uid = None
         user_sql = UserSql(connect)
         # log.debug("connect",connect)
         user_sql.table = table
-        ad_user = AdUser(ldap_config, user_sql)
+        ad_user = AdUser(ldap_config, user_sql, start_uid=start_uid)
         if 'force_gid' in ad_config and ad_config['force_gid']['enable'] is True:
             ad_user.force_gid = ad_config['force_gid']['gid']
             ad_user.force_gname = ad_config['force_gid']['name']
