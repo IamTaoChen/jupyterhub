@@ -19,7 +19,7 @@ jobs:
       run: echo "::set-output name=lower::$(echo $REPO_NAME | tr '[:upper:]' '[:lower:]')"
 
     - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag ghcr.io/${{ steps.lower_repo_name.outputs.lower }}:latest --tag ${{ secrets.DOCKER_HUB_USERNAME }}/${{ steps.lower_repo_name.outputs.lower }}:latest
+      run: docker build . --file Dockerfile --tag ghcr.io/${{ steps.lower_repo_name.outputs.lower }}:latest
 
     - name: Login to GitHub Container Registry
       run: echo ${{ secrets.GHCR_PAT }} | docker login ghcr.io -u username --password-stdin
@@ -27,8 +27,8 @@ jobs:
     - name: Push the Docker image to GHCR
       run: docker push ghcr.io/${{ steps.lower_repo_name.outputs.lower }}:latest
 
-    - name: Login to Docker Hub
-      run: echo ${{ secrets.DOCKER_HUB_PASSWORD }} | docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} --password-stdin
+    # - name: Login to Docker Hub
+    #   run: echo ${{ secrets.DOCKER_HUB_PASSWORD }} | docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} --password-stdin
 
-    - name: Push the Docker image to Docker Hub
-      run: docker push ${{ secrets.DOCKER_HUB_USERNAME }}/${{ steps.lower_repo_name.outputs.lower }}:latest
+    # - name: Push the Docker image to Docker Hub
+    #   run: docker push ${{ secrets.DOCKER_HUB_USERNAME }}/${{ steps.lower_repo_name.outputs.lower }}:latest
