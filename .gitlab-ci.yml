@@ -24,3 +24,9 @@ build_image:
         docker tag "$DOCKER_IMAGE_NAME" "$CI_REGISTRY_IMAGE:latest"
         docker push "$CI_REGISTRY_IMAGE:latest"
       fi
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"
+      changes:  # Include the job and set to when:manual if any of the follow paths match a modified file.
+        - src/*
+        - Dockerfile
+      when: always
