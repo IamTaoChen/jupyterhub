@@ -66,9 +66,8 @@ services:
 ad:
   enable: true
   # allow_users:
-  # - chentao
-  # - zzhanchuan
-  # - heqian
+  # If not empty, only users in the list will be allowed to login
+  # - xxx
   config:
     host: 10.233.10.11
     port: 389
@@ -80,13 +79,23 @@ ad:
     user_search_filter: (cn=*)
     user_username_attribute: sAMAccountName
     start_uid: 1615200000
+    # cal the users' uid from AD by sid.
+    # def sid_to_uid(cls, sid: str, base_uid: int = 1615200000):
+    #     """
+    #     RID is the last part of SID, and it is the uid of user.\n
+    #     """
+    #     rid = int(sid.split('-')[-1])
+    #     return base_uid + rid
     force_gid:
+    # If force_gid is enabled, the user's gid will be set to the following values. 
+    # Otherwise, the user's gid is same with uid.
       enable: true
       gid: 1615200513
       name: lab
-  # append_groups:
-  #     - 1615200513
   local_cache:
+  # If enabled is false, the local cache will be disabled.
+  # When true, the user's information will be fetched from the local cache.
+  # If the local cache is not found, the user's information will be fetched from AD.
     enable: true
     connect: "/data/ad_cache.sqlite3"
     table: ad_cache

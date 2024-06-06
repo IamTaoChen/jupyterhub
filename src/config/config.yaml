@@ -11,31 +11,32 @@ allowed_images:
   streamlit: my/streamlit:latest
   minimal-notebook: jupyter/minimal-notebook
 
-form:
-  logo_url_default: https://cdn2.modelbit.com/_next/static/media/modelbit-logo-only.a802bbca.svg
-  python_versions_default: ['python-3.11']
-  data:
-    - name: Modelbit
-      description: Python environment for working with the Modelbit package and ecosystem. Tools include modelbit and exploratory packages like sklearn, etc.
-      logo_url: https://cdn2.modelbit.com/_next/static/media/modelbit-logo-only.a802bbca.svg
-      python_versions: ['python-3.9', 'python-3.8', 'python-3.7']
-      image: modelbit-docker-image
+# # not implemented yet
+# form:
+#   logo_url_default: https://cdn2.modelbit.com/_next/static/media/modelbit-logo-only.a802bbca.svg
+#   python_versions_default: ['python-3.11']
+#   data:
+#     - name: Modelbit
+#       description: Python environment for working with the Modelbit package and ecosystem. Tools include modelbit and exploratory packages like sklearn, etc.
+#       logo_url: https://cdn2.modelbit.com/_next/static/media/modelbit-logo-only.a802bbca.svg
+#       python_versions: ['python-3.9', 'python-3.8', 'python-3.7']
+#       image: modelbit-docker-image
 
-    - name: OtherEnvironment
-      description: Another description.
-      logo_url: https://other-logo-url.com
-      python_versions: ['python-3.9', 'python-3.8']
-      image: other-docker-image
+#     - name: OtherEnvironment
+#       description: Another description.
+#       logo_url: https://other-logo-url.com
+#       python_versions: ['python-3.9', 'python-3.8']
+#       image: other-docker-image
 
 
 
 groups:
   collaborative:
     users:
-      - collab-eqe1
-      - collab-eqe2
+      - collab-1
+      - collab-2
     admins:
-      - wenchaoxu
+      - admins
 
 roles:
   - name: member-access-servers
@@ -44,37 +45,57 @@ roles:
     groups:
       - Member
 
-  - name: eqe1-collab-access
+  - name: collab-access
     scopes:
-      - access:servers!user=collab-eqe1
-      - admin:servers!user=collab-eqe1
+      - access:servers!user=collab-1
+      - admin:servers!user=collab-1
       - admin-ui
       - list:users!user=collab-eqe1
     groups:
       - Member
 
-  - name: eqe2-collab-access
+  - name: collab-access
     scopes:
-      - access:servers!user=collab-eqe2
-      - admin:servers!user=collab-eqe2
+      - access:servers!user=collab-2
+      - admin:servers!user=collab-2
       - admin-ui
-      - list:users!user=collab-eqe2
+      - list:users!user=collab-2
     groups:
       - Member
 
 ad:
   enabled: true
+  # allow_users:
+  ## If not empty, only users in the list will be allowed to login. it's used for testing.
+  # - xxx
   config:
     host: ad.example.com
     port: 389
-    base_dn: dc=example,dc=com
-    bind_dn: cn=binduser,dc=example,dc=com
-    bind_pw: bindpassword
-    user_search_rdn: ou=users
-    user_search_filter: (objectClass=person)
-    user_username_attribute: uid
+    base_dn: DC=ds,DC=example,DC=com
+    bind_dn:
+    bind_pw: PASSWORD
+    user_search_rdn: OU=Users
+    group_search_rdn: OU=Groups
+    user_search_filter: (cn=*)
+    user_username_attribute: sAMAccountName
     start_uid: 1615200000
+    # cal the users' uid from AD by sid.
+    # def sid_to_uid(cls, sid: str, base_uid: int = 1615200000):
+    #     """
+    #     RID is the last part of SID, and it is the uid of user.\n
+    #     """
+    #     rid = int(sid.split('-')[-1])
+    #     return base_uid + rid
+    force_gid:
+      # If force_gid is enabled, the user's gid will be set to the following values. 
+      # Otherwise, the user's gid is same with uid.
+      enable: true
+      gid: 1615200513
+      name: lab
   local_cache:
+    # If enabled is false, the local cache will be disabled.
+    # When true, the user's information will be fetched from the local cache.
+    # If the local cache is not found, the user's information will be fetched from AD.
     enabled: true
     connect: '/data/ad_cache.sqlite3'
     table: ad_cache
