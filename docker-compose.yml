@@ -21,7 +21,6 @@ services:
       args:
         VERSION: ${JUPYTERHUB_VERSION:-latest}
       tags:
-        # - my/jupyterhub:4.0
         - my/jupyterhub:${JUPYTERHUB_VERSION:-latest}
     image: my/jupyterhub:${JUPYTERHUB_VERSION:-latest}
     container_name: ${JUPYTERHUB_CONTAINER_NAME:-jupyterhub}
@@ -36,14 +35,11 @@ services:
         aliases:
           - ${JUPYTERHUB_HOSTNAME:-jupyterhub}
     # ports:
-    #   - ${JUPYTERHUB_HTTP_PORT:-15013}:8000
+    #   - ${JUPYTERHUB_HTTP_PORT:-8000}:8000
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - ${JUPYTERHUB_DATA_DIR:-./data}:/data
       - ${JUPYTERHUB_CONFIG_DIR:-./config}:/etc/jupyterhub/:ro
-      # - ${JUPYTERHUB_CONFIG_DIR:-./config}/jupyterhub_config.py:/etc/jupyterhub/jupyterhub_config.py:ro
-      # - ${JUPYTERHUB_BASE_DIR:-.}/images/jupyterhub/src/config/MyOAuth.py:/config/MyOAuth.py:ro
-      - ${JUPYTERHUB_BASE_DIR:-.}/images/jupyterhub/src/config:/config:ro
     command: jupyterhub -f /etc/jupyterhub/jupyterhub_config.py
 
 
