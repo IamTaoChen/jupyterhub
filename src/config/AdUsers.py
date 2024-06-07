@@ -13,7 +13,7 @@ class UserInfo:
     sid: str = None
     dn: str = None
     mail: str = None
-    groups: list[str] = None
+    # groups: list[str] = None
 
 
 @dataclass
@@ -158,6 +158,13 @@ class MyAD:
     @property
     def ad(self) -> Connection:
         return self.__ad
+    
+    def __enter__(self):
+        self.connect()
+        return self
+    
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.disconnect()
 
     def connect(self):
         """
