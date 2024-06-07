@@ -13,7 +13,7 @@ class UserInfo:
     sid: str = None
     dn: str = None
     mail: str = None
-    # groups: list[str]
+    groups: list[str] = None
 
 
 @dataclass
@@ -33,6 +33,9 @@ class LdapConfig:
 
     @property
     def SERVER_URL(self) -> str:
+        """
+        return ldap server url which is built by HOST, PORT and TLS
+        """
         if self.HOST is None:
             raise ValueError("HOST is None")
         return '{PROTO}://{HOST}:{PORT}'.format(
@@ -42,37 +45,64 @@ class LdapConfig:
 
     @property
     def USER_BASE_DN(self) -> str:
+        """
+        return user base dn by USER_BASE_RDN
+        """
         return self.get_dn_by_rdn(self.USER_BASE_RDN)
 
     @property
     def GROUP_BASE_DN(self) -> str:
+        """
+        return group base dn by GROUP_BASE_RDN
+        """
         return self.get_dn_by_rdn(self.GROUP_BASE_RDN)
 
     def USER_BASIC_FILTER(self, username: str) -> str:
+        """
+        return user basic filter by username
+        """
         return '({USERNAME_ATTRIBUTE}={username})'.format(username=username, USERNAME_ATTRIBUTE=self.USERNAME_ATTRIBUTE)
 
     def GROUP_BASIC_FILTER(self, groupname: str) -> str:
+        """
+        return group basic filter by groupname
+        """
         return '({GROUPNAME_ATTRIBUTE}={groupname})'.format(GROUPNAME_ATTRIBUTE=self.GROUPNAME_ATTRIBUTE, groupname=groupname)
 
     def get_dn_by_rdn(self, rdn: str) -> str:
+        """
+        get dn by rdn
+        """
         base_dn = self.BASE_DN
         if rdn is None or rdn.strip() == '':
             return base_dn
         return '{RDN},{BASE}'.format(RDN=rdn, BASE=base_dn)
 
     def get_user_dn(self, username: str) -> str:
+        """
+        get user dn by username
+        """
         return self.get_user_dn_ou(username, self.USER_BASE_DN, self.USERNAME_ATTRIBUTE)
 
     def get_group_dn(self, groupname: str) -> str:
+        """
+        get group dn by groupname
+        """
         return self.get_group_dn_ou(groupname, self.GROUP_BASE_DN, self.GROUPNAME_ATTRIBUTE)
 
     def get_user_filter(self, username: str) -> str:
+        """
+        get user filter by username
+        """
         USER_BASIC_FILTER = self.USER_BASIC_FILTER(username)
         if self.USER_FILTER is None or self.USER_FILTER.strip() == '':
             return USER_BASIC_FILTER
         return '(&({USER_BASIC_FILTER}){filter})'.format(USER_BASIC_FILTER=USER_BASIC_FILTER, filter=self.USER_FILTER)
 
     def get_group_filter(self, groupname: str) -> str:
+        """
+        get group filter by groupname
+        """
         GROUP_BASIC_FILTER = self.GROUP_BASIC_FILTER(groupname)
         if self.GROUP_FILTER is None or self.GROUP_FILTER.strip() == '':
             return GROUP_BASIC_FILTER
@@ -80,22 +110,35 @@ class LdapConfig:
 
     @classmethod
     def get_user_dn_ou(cls, username: str, ou_dn: str, USERNAME_ATTRIBUTE: str = 'uid'):
+        """
+        get user dn by username and ou_dn
+        """
         return '{USERNAME_ATTRIBUTE}={username},{OU_DN}'.format(username=username, USERNAME_ATTRIBUTE=USERNAME_ATTRIBUTE, OU_DN=ou_dn)
 
     @classmethod
     def get_group_dn_ou(cls, groupname: str, ou_dn: str, GROUPNAME_ATTRIBUTE: str = 'cn'):
+        """
+        get group dn by groupname and ou_dn
+        """
         return '{GROUPNAME_ATTRIBUTE}={groupname},{OU_DN}'.format(GROUPNAME_ATTRIBUTE=GROUPNAME_ATTRIBUTE, groupname=groupname, OU_DN=ou_dn)
 
     def server(self) -> Server:
+        """
+        Create a ldap server object
+        """
         return Server(host=self.HOST, port=self.PORT, use_ssl=self.TLS, get_info=ALL)
 
     def connect(self) -> Connection:
+        """
+        Connect to ldap server with BIND_DN and BIND_PW
+        """
         if self.BIND_DN is None:
             raise ValueError("BIND_DN is None")
         elif self.BIND_PW is None:
             raise ValueError("BIND_PW is None")
         server = self.server()
         return Connection(server, self.BIND_DN, self.BIND_PW, auto_bind=True)
+
 
 
 class MyAD:
