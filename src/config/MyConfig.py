@@ -48,6 +48,8 @@ class ImageConfig:
     name: str = None
     image: str = None
     allow_collab: bool = True
+    description: str = None
+    icon: str = None
 
     def from_dict(self, name: str, data: dict[str, str] | str):
         """
@@ -57,12 +59,11 @@ class ImageConfig:
         if isinstance(data, str):
             self.image = data
         elif isinstance(data, dict):
-            if 'image' in data:
-                self.image = data['image']
-            else:
-                raise Exception("image not found in image config")
-            if 'allow_collab' in data:
-                self.allow_collab = data['allow_collab']
+            for key in self.__dict__.keys():
+                if key in data:
+                    setattr(self, key, data[key])
+            if self.image is None:
+                raise Exception("image must be set in image config")
         else:
             raise Exception("image config is not dict or str")
 
