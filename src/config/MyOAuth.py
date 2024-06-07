@@ -234,7 +234,7 @@ class OIDC_Endpoint:
 
 
 if __name__ == "__main__":
-    discovery_url = "https://auth.eqe-lab.com/realms/eqe"
+    discovery_url = "https://auth.example.com/realms/realm1"
     MyOAuth.discovery_url = discovery_url
     auth = MyOAuth()
     auth._pre_auth()
